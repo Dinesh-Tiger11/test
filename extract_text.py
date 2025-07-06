@@ -138,3 +138,37 @@ with open(output_path, "w") as out_file:
     json.dump(document_structure, out_file, indent=2)
 
 print(f"\n✅ Structured JSON saved to: {output_path}")
+
+# Load Tables from Json
+import json
+import pandas as pd
+
+# === Load the structured JSON ===
+input_path = "/home/ec2-user/SageMaker/structured_output.json"  # update path if needed
+
+with open(input_path, "r") as f:
+    data = json.load(f)
+
+# === Extract and display tables as DataFrames ===
+table_count = 1
+for page in data:
+    page_num = page["page"]
+
+    for element in page["elements"]:
+        if element["type"] == "table":
+            title = element.get("title", f"Table {table_count}")
+            headers = element.get("headers", [])
+            rows = element.get("rows", [])
+
+            # Fallback if no headers
+            if not headers and rows:
+                headers = [f"Col{i+1}" for i in range(len(rows[0]))]
+
+            # Convert to DataFrame
+            df = pd.DataFrame(rows, columns=headers)
+            
+            print(f"\n📄 Page {page_num} | 📝 Table {table_count}: {title}")
+            display(df)
+
+            table_count += 1
+
