@@ -172,3 +172,36 @@ for page in data:
 
             table_count += 1
 
+# Display text and images
+import json
+import base64
+from PIL import Image
+from io import BytesIO
+
+# === Load structured JSON ===
+input_path = "/home/ec2-user/SageMaker/structured_output.json"  # adjust if needed
+
+with open(input_path, "r") as f:
+    data = json.load(f)
+
+# === Step 1: Display all text (in order) ===
+print("\n📝 ALL TEXT (Ordered):\n" + "=" * 50)
+
+for page in data:
+    print(f"\n📄 Page {page['page']}")
+    for element in page["elements"]:
+        if element["type"] == "text":
+            print(element["content"])
+
+# === Step 2: Show all images (in order) ===
+print("\n🖼️ DISPLAYING IMAGES (in order)...")
+
+image_count = 1
+for page in data:
+    for element in page["elements"]:
+        if element["type"] == "image":
+            img_data = base64.b64decode(element["content"])
+            img = Image.open(BytesIO(img_data))
+            print(f"\n📸 Image {image_count} (from Page {page['page']})")
+            img.show()  # This will open the image in default viewer
+            image_count += 1
